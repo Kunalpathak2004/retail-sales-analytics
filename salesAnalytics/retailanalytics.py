@@ -7,4 +7,4 @@ import numpy as np
 import os
 for dirname, _, filenames in os.walk(r'D:\retail-sales-analytics\salesAnalytics'):
     for filename in filenames:
-        print(os.path.join(dirname, filename))
+        print(":::::",os.path.join(dirname, filename))
