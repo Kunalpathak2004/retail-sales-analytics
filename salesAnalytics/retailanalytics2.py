@@ -3,6 +3,7 @@ import seaborn as sb
 import matplotlib.pyplot as plt
 from scipy import stats ## this liibrary is used for using statistical functions
 
+# cleaning the data
 data = pd.read_csv(r'D:\retail-sales-analytics\salesAnalytics\Sample - Superstore.csv', encoding='ISO-8859-1')
 print(data.head()) ## this step is done to see whether the data is loaded correrctly or not
 
@@ -16,3 +17,16 @@ plt.figure(figsize = (7,7)) ## helps to figure the size of matrix
 sb.heatmap(correlation_matrix,annot=True,cmap='coolwarm') ##converts matrix into heatmap matrix
 plt.title("Correlational Maatrix") ##Gives the title of matrix
 plt.show() ## to dispay the matrix
+
+# converting data types
+data.dropna(inplace=True)
+data['Order Date'] = pd.to_datetime(data['Order Date'])## this converts the data type of order data into date time data type
+print(data.info())
+
+# putting month and year o order date
+data['month'] = data['Order Date'].dt.month
+data['year'] = data['Order Date'].dt.year
+print(data.head())
+
+# describing the data
+print(data.describe())
