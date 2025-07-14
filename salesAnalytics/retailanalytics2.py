@@ -30,3 +30,24 @@ print(data.head())
 
 # describing the data
 print(data.describe())
+
+# performing exploratory data analysis (EDA)
+# a) using time series charts like axis graphs
+monthly_sales = data.groupby(['year', 'month'])['Sales'].sum().reset_index() ##this line groups the data into year and month and sums thier values and then resets it do that we can plot it properly
+print("::m", monthly_sales)
+plt.figure(figsize=(14,7))
+sb.lineplot(data=monthly_sales, x="month", y="Sales", hue="year")
+plt.title("Monthly Sales Report")
+plt.show()
+print(monthly_sales) 
+# from this we get a line chart
+# b) using bar and pie chart
+plt.figure(figsize=(12,6))
+sb.lineplot(data=data, x ='Category', y='Sales', hue='Region')
+plt.title('Category wise Sales by Region')
+plt.show()
+
+region_sales = data.groupby('Region') ['Sales'].sum()
+plt.pie(region_sales,labels=region_sales.index,autopct='%1.1f%%')
+plt.title('Sales by Region')
+plt.show()
