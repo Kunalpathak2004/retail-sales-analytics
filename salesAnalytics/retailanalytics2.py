@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 from scipy import stats ## this liibrary is used for using statistical functions
 
 # cleaning the data
-data = pd.read_csv(r'D:\retail-sales-analytics\salesAnalytics\Sample - Superstore.csv', encoding='ISO-8859-1')
+data = pd.read_csv(r'salesAnalytics/Sample - Superstore.csv', encoding='ISO-8859-1')
 print(data.head()) ## this step is done to see whether the data is loaded correrctly or not
 
 print(data.info())
