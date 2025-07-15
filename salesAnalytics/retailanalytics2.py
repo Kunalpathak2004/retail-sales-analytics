@@ -2,21 +2,34 @@ import pandas as pd
 import seaborn as sb 
 import matplotlib.pyplot as plt
 from scipy import stats ## this liibrary is used for using statistical functions
+import streamlit as st
+
+
+st.title("Retail Sales Analytics")
+
+uploaded_file = st.file_uploader("Upload your CSV file", type=["csv"])
+if not uploaded_file:
+    st.info("Please upload the Sample‑Superstore CSV to view charts.")
+    st.stop()
 
 # cleaning the data
 data = pd.read_csv(r'salesAnalytics/Sample - Superstore.csv', encoding='ISO-8859-1')
 print(data.head()) ## this step is done to see whether the data is loaded correrctly or not
 
 print(data.info())
+st.write("File loaded. First 5 rows:")
+st.dataframe(data.head())
 
 # now we will turn the data into a correlation matrix of heatmap
 num_data = data.select_dtypes(include='number') ## this helps in including only numeric data
 correlation_matrix = num_data.corr() ## this turns the data into correlation matrix mraniing a square matrix inform of i,j
 print(correlation_matrix)
-plt.figure(figsize = (7,7)) ## helps to figure the size of matrix
+fig = plt.figure(figsize = (7,7)) ## helps to figure the size of matrix
 sb.heatmap(correlation_matrix,annot=True,cmap='coolwarm') ##converts matrix into heatmap matrix
 plt.title("Correlational Maatrix") ##Gives the title of matrix
 plt.show() ## to dispay the matrix
+st.pyplot(fig)
+
 
 # converting data types
 data.dropna(inplace=True)
@@ -35,37 +48,48 @@ print(data.describe())
 # a) using time series charts like axis graphs
 monthly_sales = data.groupby(['year', 'month'])['Sales'].sum().reset_index() ##this line groups the data into year and month and sums thier values and then resets it do that we can plot it properly
 print("::m", monthly_sales)
-plt.figure(figsize=(14,7))
+fig2 = plt.figure(figsize=(14,7))
 sb.lineplot(data=monthly_sales, x="month", y="Sales", hue="year")
 plt.title("Monthly Sales Report")
 plt.show()
+st.pyplot(fig2)
+
 print(monthly_sales) 
 # from this we get a line chart
 # b) using bar and pie chart
-plt.figure(figsize=(12,6))
+fig3=plt.figure(figsize=(12,6))
 sb.barplot(data=data, x ='Category', y='Sales', hue='Region')
 plt.title('Category wise Sales by Region')
 plt.show()
+st.pyplot(fig3)
+
 
 region_sales = data.groupby('Region') ['Sales'].sum()
-plt.pie(region_sales,labels=region_sales.index,autopct='%1.1f%%')
-plt.title('Sales by Region')
-plt.show()
+fig4, ax = plt.subplots()
+ax.pie(region_sales, labels=region_sales.index, autopct='%1.1f%%')
+ax.set_title('Sales Distribution by Region')
+# plt.pie(region_sales,labels=region_sales.index,autopct='%1.1f%%')
+# plt.title('Sales by Region')
+# plt.show()
+st.pyplot(fig4)
+
 # c) Scatter plot
-plt.figure(figsize=(8,6))
+fig5=plt.figure(figsize=(8,6))
 sb.scatterplot(data=data, x='Sales',y='Profit',hue='Segment')
 plt.title("Sales vs Profit by Customer Segment")
 plt.show()
+st.pyplot(fig5)
 
 
 # d) performance analysis
 data.columns = data.columns.str.strip()
 # print(data.columns.tolist())
 product_performance = data.pivot_table(values='Sales',index='Category',columns='Sub-Category',aggfunc='sum')
-plt.figure(figsize=(12,8))
+fig6=plt.figure(figsize=(12,8))
 sb.heatmap(product_performance,cmap='YlGnBu')
 plt.title('Product Performance Heatmap')
 plt.show()
+st.pyplot(fig6)
 
 # e) Hypothesis testing and statistical analysis
 region1 = 'East'
