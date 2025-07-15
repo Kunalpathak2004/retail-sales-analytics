@@ -7,7 +7,7 @@ import streamlit as st
 
 st.title("Retail Sales Analytics")
 
-uploaded_file = st.file_uploader("Upload your CSV file", type=["csv"])
+uploaded_file = st.file_uploader(r'salesAnalytics/Sample - Superstore.csv', type=["csv"])
 if not uploaded_file:
     st.info("Please upload the Sample‑Superstore CSV to view charts.")
     st.stop()
