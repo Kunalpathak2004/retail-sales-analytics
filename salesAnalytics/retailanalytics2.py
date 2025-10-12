@@ -7,6 +7,8 @@ from scipy import stats ## this liibrary is used for using statistical functions
 from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.metrics import mean_squared_error
+from sklearn.cluster import KMeans
+from sklearn.preprocessing import StandardScaler
 import streamlit as st
 
 
@@ -204,6 +206,36 @@ plt.title("Retail Sales Forecast")
 plt.xlabel("YearMonth")
 plt.ylabel("Sales")
 plt.legend()
+plt.grid(True)
 plt.show()
 st.pyplot(fig_forecast)
+
+# we are adding clustering algorith for customer segmentation
+customer_data = data.groupby('Customer ID').agg({
+    'Sales': 'sum',
+    'Profit': 'sum'
+}).reset_index()
+
+x = customer_data[['Sales', 'Profit']]
+# we normalize the features
+scaler = StandardScaler()
+X_scaled = scaler.fit_transform(x)
+# apply KMeans algorithm
+kmeans = KMeans(n_clusters=3, random_state=42)
+customer_data['Cluster'] = kmeans.fit_predict(X_scaled)
+# visualize the kmeans 
+fig_cluster = plt.figure(figsize=(10, 6))
+sb.scatterplot(data=customer_data, x='Sales', y='Profit', hue='Cluster', palette='Set2', s=100, alpha=0.7)
+plt.title('Customer Segmentation Based on Sales and Profit')
+plt.xlabel('Total Sales')
+plt.ylabel('Total Profit')
+plt.legend(title='Cluster')
+plt.grid(True)
+plt.show()
+
+st.pyplot(fig_cluster)
+
+# Show cluster counts
+st.write(customer_data['Cluster'].value_counts())
+
 
