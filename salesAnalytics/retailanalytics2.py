@@ -1,7 +1,12 @@
 import pandas as pd 
+import numpy as np
 import seaborn as sb 
 import matplotlib.pyplot as plt
+import datetime 
 from scipy import stats ## this liibrary is used for using statistical functions
+from sklearn.model_selection import train_test_split
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.metrics import mean_squared_error
 import streamlit as st
 
 
@@ -11,6 +16,56 @@ uploaded_file = st.file_uploader("Upload your csv file", type=["csv"])
 if not uploaded_file:
     st.info("Please upload the Sample‑Superstore CSV to view charts.")
     st.stop()
+
+def streamlit_config():
+
+    # page configuration
+    st.set_page_config(page_title='Forecast', layout="wide")
+
+    # page header transparent color
+    page_background_color = """
+    <style>
+
+    [data-testid="stHeader"] 
+    {
+    background: rgba(0,0,0,0);
+    }
+
+    </style>
+    """
+    st.markdown(page_background_color, unsafe_allow_html=True)
+
+
+# custom style for submit button - color and width
+
+def style_submit_button():
+
+    st.markdown("""
+                    <style>
+                    div.stButton > button:first-child {
+                                                        background-color: #367F89;
+                                                        color: white;
+                                                        width: 70%}
+                    </style>
+                """, unsafe_allow_html=True)
+
+
+# custom style for prediction result text - color and position
+
+def style_prediction():
+
+    st.markdown(
+        """
+            <style>
+            .center-text {
+                text-align: center;
+                color: #20CA0C
+            }
+            </style>
+            """,
+        unsafe_allow_html=True
+    )
+
 
 # cleaning the data
 data = pd.read_csv(r'salesAnalytics/Sample - Superstore.csv', encoding='ISO-8859-1')
@@ -111,3 +166,44 @@ print(num_data.corr())
 print(data.describe())
 
 sb.histplot(data=data, x='Discount', bins=20, kde=True)
+
+## starting the machine learning part
+## starting randomforest to forecast  the future sales values
+#use montly sales data and create a feature set
+monthly_sales['year_month'] = monthly_sales['year']*100 + monthly_sales['month'] ## this line of code will turn the date  like jan 2025 to 202501
+# create feature and target
+x = monthly_sales[['year','month','year_month']] ## this is feature to use
+y = monthly_sales['Sales']
+#  use train test split
+x_train,x_test,y_train,y_test = train_test_split(x,y,test_size=0.2,random_state=42)
+# now we train the random forest regressor
+model = RandomForestRegressor(n_estimators=100,random_state=42) ## n_estimators = 100 means the sellection will be going through 100 decision trees
+model.fit(x_train,y_train)
+# predict the model and evaluate
+y_pred = model.predict(x_test)
+rmse = np.sqrt(mean_squared_error(y_pred,y_test))
+st.write(f"Model RMSE: {rmse:.2f}")
+# now we predict the future sale values of next 6 months
+last_year = monthly_sales['year'].max()
+last_month = monthly_sales['month'].max()
+future_dates = []
+for i in range(1,7):
+    month = (last_month + i)%12
+    year = last_year + (last_month + i-1)//12
+    if month == 0:
+        month = 12
+    future_dates.append({'year' : year , 'month' : month, 'year_month' : year*100+month})
+
+future_df = pd.DataFrame(future_dates)
+future_sales_pred = model.predict(future_df)
+# visualization of randomforestregresser
+fig_forecast = plt.figure(figsize=(14,7))
+sb.lineplot(data=monthly_sales,x='year_month',y='Sales',label = 'Historical Sales')
+plt.plot(future_df['year_month'],future_sales_pred,color = "red", marker = "o", label = "Predicted Sales")
+plt.title("Retail Sales Forecast")
+plt.xlabel("YearMonth")
+plt.ylabel("Sales")
+plt.legend()
+plt.show()
+st.pyplot(fig_forecast)
+
